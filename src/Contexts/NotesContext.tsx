@@ -12,8 +12,8 @@ export const NotesProvider = ({ children }: { children: ReactNode }) =>{//Нас
     const [notes, setNotes] = useState<NoteData[]>([])//черрез стэйт
     const addNote = (note:NoteData)=>{
         setNotes((prev)=>[...prev,note])// перересовывает прошлое значение и добавляет новое из формы NoteForm.tsx
-    }
-
+    }   
+        
     return(//Передает значение value всем компонентам внутри. Написано в __root.tsx
         <NotesContext.Provider value={{notes, addNote}}>
             {children}

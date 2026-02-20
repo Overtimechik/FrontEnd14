@@ -6,15 +6,13 @@ import { useNavigate } from "@tanstack/react-router";
 import { useNotes } from "../../Contexts/NotesContext";
 
 //// ТИПИЗАЦИЯ
-interface Props{
+interface Props { }
 
-}
-
-export  interface NoteData {
-  id: string;
-  title: string;
-  description: string;
-  time: string;
+export interface NoteData {
+    id: string;
+    title: string;
+    description: string;
+    time: string;
 }
 
 type FormValues = {
@@ -24,9 +22,10 @@ type FormValues = {
 
 
 ///ЛОГИКА ФОРМЫ
-export const NoteForm: FC<Props> = function NoteForm(){
+export const NoteForm: FC<Props> = function NoteForm() {
     const navigate = useNavigate()
-    const {addNote} = useNotes()
+    const { addNote } = useNotes()
+
     const {
         register,
         handleSubmit,
@@ -34,39 +33,38 @@ export const NoteForm: FC<Props> = function NoteForm(){
         reset,
     } = useForm<FormValues>();
 
-
     const onSubmit = (data: FormValues) => {
-        const newNote:NoteData={
-          id:crypto.randomUUID(),
-          title:data.title,
-          description:data.text,
-          time:new Date().toLocaleTimeString("ru-RU", {hour: "2-digit", minute: "2-digit", })
+        const newNote: NoteData = {
+            id: crypto.randomUUID(),
+            title: data.title,
+            description: data.text,
+            time: new Date().toLocaleTimeString("ru-RU", { hour: "2-digit", minute: "2-digit" })
         }
-        addNote(newNote);//Добавление заметки в контекст для обновления и записи
-        console.log(data); 
+        addNote(newNote);
         reset();
-        navigate({ to: "/notes_list" });
+        navigate({ to: "/notes_list", search: { created: true } });
     };
 
-
-
     ///СТРУКТУРА ФОРМЫ
-    return <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col mx-auto gap-4 justify-center p-5 w-full max-w-md border border-black rounded-xl mt-4">
-        
-        <h1 className="text-xl font-bold">Создание заметки</h1>
+    return <>
+        <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col mx-auto gap-4 justify-center p-5 w-full max-w-md border border-black rounded-xl mt-4">
 
-        <TextField id="outlined-basic" label="Название" variant="outlined" 
+            <h1 className="text-xl font-bold">Создание заметки</h1>
+
+            <TextField id="outlined-basic" label="Название" variant="outlined"
                 error={!!errors.title}
                 helperText={errors.title?.message}
                 {...register("title", { required: "Введите название" })}
                 fullWidth />
 
-        <TextField id="standard-basic" label="Текст заметки" variant="outlined" multiline  rows={6}
+            <TextField id="standard-basic" label="Текст заметки" variant="outlined" multiline rows={6}
                 error={!!errors.text}
                 helperText={errors.text?.message}
-                {...register("text",{required:"Введите текст заметки"})}
-        />
+                {...register("text", { required: "Введите текст заметки" })}
+            />
 
-        <Button type="submit">Добавить заметку</Button>
-    </form>
+            <Button type="submit">Добавить заметку</Button>
+        </form>
+
+    </>
 }
