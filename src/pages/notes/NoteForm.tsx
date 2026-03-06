@@ -4,6 +4,7 @@ import { TextField } from "@mui/material";
 import { useForm } from "react-hook-form";
 import { useNavigate } from "@tanstack/react-router";
 import { useNotes } from "../../Contexts/NotesContext";
+import { useState } from "react";
 
 //// ТИПИЗАЦИЯ
 interface Props { }
@@ -25,6 +26,7 @@ type FormValues = {
 export const NoteForm: FC<Props> = function NoteForm() {
     const navigate = useNavigate()
     const { addNote } = useNotes()
+    const [isSubmitting, setIsSubmitting] = useState(false)
 
     const {
         register,
@@ -33,16 +35,22 @@ export const NoteForm: FC<Props> = function NoteForm() {
         reset,
     } = useForm<FormValues>();
 
-    const onSubmit = (data: FormValues) => {
-        const newNote: NoteData = {
-            id: crypto.randomUUID(),
-            title: data.title,
-            description: data.text,
-            time: new Date().toLocaleTimeString("ru-RU", { hour: "2-digit", minute: "2-digit" })
+    const onSubmit = async (data: FormValues) => {
+        setIsSubmitting(true)
+        try {
+            const newNote = {
+                title: data.title,
+                description: data.text,
+                time: new Date().toLocaleTimeString("ru-RU", { hour: "2-digit", minute: "2-digit" })
+            }
+            await addNote(newNote)
+            reset()
+            navigate({ to: "/notes_list", search: { created: true } })
+        } catch (error) {
+            console.error("Ошибка при создании заметки:", error)
+        } finally {
+            setIsSubmitting(false)
         }
-        addNote(newNote);
-        reset();
-        navigate({ to: "/notes_list", search: { created: true } });
     };
 
     ///СТРУКТУРА ФОРМЫ
@@ -63,7 +71,9 @@ export const NoteForm: FC<Props> = function NoteForm() {
                 {...register("text", { required: "Введите текст заметки" })}
             />
 
-            <Button type="submit">Добавить заметку</Button>
+            <Button type="submit" disabled={isSubmitting}>
+                {isSubmitting ? "Добавляю..." : "Добавить заметку"}
+            </Button>
         </form>
 
     </>
