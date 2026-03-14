@@ -3,6 +3,7 @@ import { useState } from "react";
 import { Dialog, DialogTitle, DialogContent, DialogActions } from "@mui/material";
 import { useNotes } from "../Contexts/NotesContext";
 import { Button } from "../share/Button";
+import { useNavigate } from "@tanstack/react-router";
 
 interface Props {
   id: string;
@@ -13,6 +14,7 @@ interface Props {
 
 export const Note: FC<Props> = ({ id, title, description, time }) => {
   const { deleteNote } = useNotes();
+  const navigate = useNavigate();
   const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
 
@@ -48,6 +50,12 @@ export const Note: FC<Props> = ({ id, title, description, time }) => {
         <div className="flex justify-between items-end gap-2">
           <p className="text-white text-xs whitespace-nowrap">{time}</p>
           <div className="flex gap-2 shrink-0">
+            <button
+              onClick={(e) => { e.stopPropagation(); navigate({ to: "/notes_list/$notesId/edit", params: { notesId: id } }); }}
+              className="px-2 py-1 text-xs bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors"
+            >
+              Ред.
+            </button>
             <button
               onClick={handleDeleteClick}
               className="px-2 py-1 text-xs bg-red-600 text-white rounded hover:bg-red-700 transition-colors"

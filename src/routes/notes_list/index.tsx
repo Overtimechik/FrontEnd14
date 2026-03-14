@@ -10,4 +10,5 @@ export const Route = createFileRoute('/notes_list/')({
 
 function RouteComponent() {
   return <NotesList />
+  
 }

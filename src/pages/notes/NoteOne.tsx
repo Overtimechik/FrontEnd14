@@ -1,5 +1,5 @@
 import type { FC } from "react";
-import { useParams } from "@tanstack/react-router";
+import { useParams, useNavigate, Outlet, useChildMatches } from "@tanstack/react-router";
 import { useNotes } from "../../Contexts/NotesContext";
 import { Button } from "../../share/Button";
 import { useEffect, useState } from "react";
@@ -11,7 +11,9 @@ interface Props { }
 
 export const NoteOne: FC<Props> = function NoteOne() {
     const { notesId } = useParams({ from: "/notes_list/$notesId" })
+    const navigate = useNavigate()
     const { deleteNote } = useNotes()
+    const childMatches = useChildMatches()
     const [note, setNote] = useState<INote | null>(null)
     const [isLoading, setIsLoading] = useState(true)
     const [openDeleteDialog, setOpenDeleteDialog] = useState(false)
@@ -43,7 +45,7 @@ export const NoteOne: FC<Props> = function NoteOne() {
         try {
             await deleteNote(note.id)
             setOpenDeleteDialog(false)
-            
+            navigate({ to: "/notes_list", search: { created: false } })
         } catch (error) {
             console.error("Ошибка при удалении заметки:", error)
         } finally {
@@ -53,6 +55,11 @@ export const NoteOne: FC<Props> = function NoteOne() {
 
     const handleDeleteCancel = () => {
         setOpenDeleteDialog(false)
+    }
+
+    // Если активен дочерний роут /edit — рендерим форму вместо страницы заметки
+    if (childMatches.length > 0) {
+        return <Outlet />
     }
 
     if (isLoading) {
@@ -73,21 +80,25 @@ export const NoteOne: FC<Props> = function NoteOne() {
                     </div>
                 </div>
                 <p className="text-white mb-6 whitespace-pre-wrap">{note.description}</p>
-                
+
                 <div className="flex gap-4">
-                    <Button 
+                    <Button
+                        onClick={() => navigate({ to: "/notes_list/$notesId/edit", params: { notesId } })}
+                    >
+                        Редактировать
+                    </Button>
+                    <Button
                         onClick={handleDeleteClick}
                         style={{ backgroundColor: '#d32f2f' }}
                     >
                         Удалить
                     </Button>
-
                 </div>
             </div>
         </div>
 
-        <Dialog 
-            open={openDeleteDialog} 
+        <Dialog
+            open={openDeleteDialog}
             onClose={handleDeleteCancel}
             aria-labelledby="alert-dialog-title"
             aria-describedby="alert-dialog-description"
@@ -104,7 +115,7 @@ export const NoteOne: FC<Props> = function NoteOne() {
                 <Button onClick={handleDeleteCancel}>
                     Отмена
                 </Button>
-                <Button 
+                <Button
                     onClick={handleDeleteConfirm}
                     disabled={isDeleting}
                     style={{ backgroundColor: '#d32f2f' }}
